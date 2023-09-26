@@ -9,7 +9,143 @@
     <body>
         <div style="width: 70%;margin-left: auto;margin-right: auto; margin-top: 48px;margin-bottom: 60px;">
             <md-block class="markdown-body">
+                
+                <img width="100" height="100" src="tripdraw.png" style="margin-bottom: 20px;">
 
+                <div style="font-size: 300%;font-weight: bold;"> TripDraw 학습 내용</div>
+
+                <br>
+
+                <div style="font-size: 170%;font-weight: bold;"> TripDraw 팀프로젝트를 진행하며 학습한 내용을 자세히 정리하였습니다.</div>
+
+                ## 💡 학습한 부분
+                
+                우아한테크코스 과정을 거치며 객체지향, 도메인, 개발 전반의 개념을 학습 후 도입해본 프로젝트입니다.
+
+                아키텍처 패턴을 다양한 관점으로 바라보며 관심사 분리, 테스트 성 등 아키텍처 패턴을 사용했을 때의 이점을 끌어낼 수 있도록 고민하며 코드를 작성하였습니다.
+
+                팀의 리드로서 팀을 이끌고 모든 부분에 대해 확실하게 학습할 수 있는 계기가 되었습니다.
+
+                일정 추산, 팀원 간의 갈등 해소 등 개발 외적으로도 많이 성장하게 되었습니다.   
+                
+                <br>
+
+                - **도메인에 대한 개념 학습 및 객체지향적으로 코드를 작성하는 연습**
+
+                    개발 패러다임의 근본 중 하나인 객체지향적인 코드를 통하여 객체들에 적절한 책임을 부여하도록 코드를 작성하였습니다.   
+                    도메인 모델을 확립 후 비지니스 로직을 도메인 모델에 배치하려 노력하였습니다. 이를 통해 뷰모델이 비대해지는 현상을 피할 수 있도록 하였습니다.   
+                    또한 외부의 변화에 흔들리지 않는 도메인을 구축하려 노력하였습니다.  
+                    
+                    <br> 
+
+                - **아키텍처 패턴 전반에 대한 이해**
+
+                    UI 아키텍처 패턴의 핵심이라고 생각하는 관심사 분리를 고려하며 코드를 작성하였습니다.   
+                    뷰, 도메인, 데이터 레이어를 나누고 각 레이어의 변경 사항이 다른 레이어에 전파되지 않도록 고려하였습니다.
+                    레이어 내부에서도 변경 사항이 최대한 전파되지 않을 수 있는 구조와 네이밍에 대해 고려하였습니다.   
+                    테스트를 위한 구조를 고려하고 유닛테스트의 용이성을 위하여 안드로이드 의존성을 최대한 제거하려 노력하였습니다.
+
+                    <br>
+
+                - **테스트 도입**
+
+                    유닛 테스트를 통하여 비지니스 로직에 대한 검증과 뷰모델의 검증을 시도하였습니다. 테스트 더블에 대해 학습하고 적용하였습니다.
+
+                    <br>
+
+                - **기술에 대한 이해도 있는 접근 및 최적화 시도**
+
+                    위치 트래킹 기능 개발 시 여러 가지 방법 중 다양한 요소를 고려하여 기술을 채택 하였습니다.   
+                    - 사용자 편의성  ex) 백그라운드 위치 권한을 우회하기 위해 BroadcastReceiver 대신 Foreground service사용
+                    - 배터리, 발열 등 성능  ex) 배터리, 발열에 대한 최적화를 위해 service 대신 AlarmManager를 도입
+
+                    <br>
+
+                - **서버통신 오류처리(callAdapter)관련 보일러플레이트 코드 제거**
+
+                    서버 통신관련 오류처리를 계속 발전시키려고 시도하였습니다.   
+                    sealed class의 경우의 수 각각에 대한 처리 로직을 매번 작성해주어야 해서 많은 보일러플레이트 코드가 생성되는 것을 개선하였습니다.   
+                    process라는 유틸 함수를 제작하여 일반적인 상황에 대한 기본 핸들러를 달아주어 매번 처리 로직을 작성하지 않도록 개선하였습니다.   
+                    
+                    [process 함수 코드](https://github.com/woowacourse-teams/2023-trip-draw/blob/develop-android/android/app/src/main/java/com/teamtripdraw/android/data/httpClient/retrofitAdapter/responseState/ResponseState.kt)
+
+                    <br>
+
+                - **OkHttp 학습 내용 적용 및 최적화**
+
+                    Http 통신 라이브러리인 OKhttp와 Retrofit에 대한 학습 내용을 적용하였습니다.   
+                    서버 통신 시 쓰레드 처리를 해주는 OKHttp Dispatcher에 대한 학습 후 성능 최적화를 위해 MaxRequestsPerHost를 10으로 변경하여 성능을 개선했습니다.   
+                    
+                    [서버 통신 스레드 관련 학습 블로그 글](https://mccoy-devloper.tistory.com/127)   
+                    
+                    [레트로핏 학습 블로그 글](https://mccoy-devloper.tistory.com/126)
+
+                    OkHttp connectionPool과 threadPool을 관리하는 방법에 대하여 학습하여 OKhttp client를 여러 개 생성할 때 자원이 낭비되지 않도록 connectionPool과 threadPool 을 공유하도록 설정하였습니다.
+
+                    <br>
+
+                - **촘촘한 오류처리**
+
+                    오류가 자주 일어나는 지점을 정의하고 이에 대한 에러 핸들러를 범용적으로 사용할 수 있도록 작성하여 매번 같은 로직을 배치하지 않도록 하였습니다.   
+                    이를 통해 개별적인 오류처리의 경우 간결하게 작성하여 유지보수성을 높였습니다.
+
+                    오류가 다수 발생하는 지점 및 관련 핸들러
+
+                    - 서버 통신 → callAdapter 커스텀을 통한 핸들러
+
+                    - 로컬 I/O → coroutineExceptionHandler
+
+                    - 그 외의 다양한 오류 → UncaughtExceptionHandelr + Crashlytics조합을 통한 사용자 경험 개선
+
+                    <br>
+
+                - **모니터링 시스템 도입**
+
+                    오류에 대한 빠른 대응을 위해 원격 로깅 및 모니터링 시스템을 구축하였습니다.   
+                    Crashlytics를 도입하고 슬랙과 연동하여 빠른 알림을 받을 수 있도록 하였습니다.   
+                    Sentry를 도입하여 원격으로 에러 정보를 수집하여 에러의 원인을 파악하기 쉽게 하였습니다.
+
+                    [Sentry 도입에 관한 블로그 글](https://mccoy-devloper.tistory.com/131)
+
+                    <br>
+
+                ## 🖥 담당한 기능 (Android)
+
+                기초세팅
+                - 안드로이드
+                    - [모듈분리(domain, support)](https://github.com/woowacourse-teams/2023-trip-draw/issues/1)
+                    - gradle 관리(version catalog를 통한 버전관리)
+                    - [DI 기초세팅 시 수동 DI 세팅](https://github.com/woowacourse-teams/2023-trip-draw/issues/43) (안드로이드 수동 DI 공식문서 참고)(현재 Hilt로 변경)
+                    - [Release, Dev 버전 분리 및 관련 처리 (각종 log tool 사용여부, baseurl)](https://github.com/woowacourse-teams/2023-trip-draw/issues/248)
+                - Http 클라이언트(Retrofit2, OkHttp)
+                    - Sealed class를 통한 서버 통신 응답 상황 분기 처리 (callAdapter커스텀 사용)
+                    - [callAdapter커스텀 관련 보일러플레이트 코드 제거용 process 함수 생성](https://github.com/woowacourse-teams/2023-trip-draw/issues/3#callAdapter%20%EA%B4%80%EB%A0%A8%20util%20%ED%95%A8%EC%88%98%20%EC%9E%91%EC%84%B1)
+                    - [okhttp 커넥션풀, maxRequest 조절, Interceptor 설정](https://github.com/woowacourse-teams/2023-trip-draw/issues/3#OKhttp%20maxRequestsPerHost%EC%88%98%2010%EC%9C%BC%EB%A1%9C%20%EC%A1%B0%EC%A0%95)
+                - Log 및 에러 모니터링 툴 Sentry, firebase crashlytics 세팅
+                    - [Firebasse Crashlttics, Timber, sentry 를 이용하여 Releaese 와 debug 버전 별로 로컬 혹은 원격에 로깅 하는 기준을 잡고 이에 대한 처리를 담당하는 logUtil 제작](https://mccoy-devloper.tistory.com/131)
+                    - Firebase Crashlytics 세팅
+                    - Sentry 세팅
+                - 소셜로그인 및 토큰 관련 처리
+                    - [카카오 소셜로그인 도입](https://github.com/woowacourse-teams/2023-trip-draw/issues/266)
+                    - [자체 access token 관리 및 refresh token을 통하여 자동 갱신 로직 작성(callAdapter에 도입)](https://github.com/woowacourse-teams/2023-trip-draw/issues/352)
+                - 위치 트래킹 및 지도 위치 표시 기능 개발
+                    - 네이버 지도 관련 기능 개발
+                    - [fusedLocationClient, AlarmManager, Service 를 사용하여 일정 기간마다 위치정보를 서버에 저장하는 기능 개발(위치 트래킹)](https://github.com/woowacourse-teams/2023-trip-draw/issues/75)
+                    - 위치 트래킹 기능 백그라운드 기능 최적화
+                    - 위치 관련 권한 처리
+                    - [bindService를 통하여 서버 업데이트 사항 해당 액티비티가 켜져 있다면 최신화하는 기능 개발](https://github.com/woowacourse-teams/2023-trip-draw/issues/193)
+
+                    <br>
+                    
+                ## 🛠 사용 기술 및 라이브러리
+                - 아키텍쳐 패턴 : MVVM
+                - AAC : Databinding, Livedata, ViewModel
+                - 통신 : OkHttp3, Retrofit2
+                - Async Task : Coroutine
+                - 직렬화 : Parcelable(Pacelize)
+                - Third Party Library : Glide, Moshi
+                - 협업 : Git flow
+                - DI : Hilt
         </md-block>
         </div>
         
