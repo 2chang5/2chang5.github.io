@@ -9,10 +9,116 @@
     <body>
         <div style="width: 70%;margin-left: auto;margin-right: auto; margin-top: 48px;margin-bottom: 60px;">
             <md-block class="markdown-body">
-                <img width="100" height="100" src="tripdraw.png" style="margin-bottom: 20px;">
+                <img width="100" height="100" src="readme.png" style="margin-bottom: 20px;">
 
-                <div style="font-size: 300%;font-weight: bold;"> TripDraw 학습 내용</div>
-        </md-block>
+                <div style="font-size: 300%;font-weight: bold;"> Readme 학습 내용</div>
+
+                <br>
+
+                <div style="font-size: 170%;font-weight: bold;"> Readme 팀프로젝트를 진행하며 성장한 내용을 자세히 정리하였습니다.</div>
+                
+                ## 💡 성장한 부분
+
+                두 번째로 진행한 안드로이드 프로젝트로 기존 프로젝트에서 느낀 오류처리 관련 문제점을 개선하려 노력하였으며 새로운 챌린지 요소인 멀티모듈을 도입하며 학습을 시도하였습니다.
+
+                <br>
+
+                - **모듈을 나누는 장점 및 단점 체험 및 이해**
+
+                    모노리틱이 아닌 멀티모듈을 처음으로 경험해보고 각각의 장단점을 체험할 기회였습니다.   
+                    모듈을 나누면서 생기는 다양한 고려 요소들을 학습할 수 있었습니다
+
+                    - 컴포넌트 재활용을 위한 모듈별 계층구조 설정
+                    - 모듈을 나누는 기법 ex) 최초 설계가 힘들다면 모노리틱으로 시작하여 모듈을 분리하는 방식을 취한다.
+
+                    모듈에 관련된 여러 가지 문제점을 겪고 이에 대한 해결책을 고민해볼 수 있는 계기가 되었습니다.
+
+                    <br>
+
+                - **모듈을 나눔으로써 뚜렷이 나타나는 의존에 대한 이해(dip, di)**
+
+                    물리적인 분리가 일어나는 멀티모듈 환경에서 의존관계를 명시적으로 설정하면서 의존성에 대해 학습할 수 있는 계기가 되었습니다.   
+                    또한 추상화의 장점을 활용할 수 있는 원칙 중 하나인 dip에 대해 실제적인 이해를 할 수 있는 기회였습니다.   
+                    DI 라이브러리를 활용하는 방법을 학습하였습니다.
+
+                    <br>
+
+                - **멀티모듈 환경에서 gradle 관리를 위한 방법 학습**
+
+                    멀티모듈을 다루면서 큰 문제점으로 다가온 “모든 모듈의 버전을 각각 바꿔줘야 한다.”를 고민해보고 이에 대한 해결책을 찾아본 결과   
+                    2021 Droid Knights 애플리케이션의 코드를 참고하여 buildSrc 모듈을 통해 라이브러리 의존성에 대한 버전을 일괄적으로 관리하도록 하여 버전 관리에 대한 불편한 점을 개선하였습니다.   
+                    CommonGradle로 공통적인 Gradle 코드를 분리해내어 코드의 중복을 제거하였습니다.
+                    
+                    <br>
+
+                - **기존 프로젝트에서 느낀 오류처리에 대한 문제점 개선(callAdpater 최초 도입)**
+
+                    기존 프로젝트 오류처리의 불편한 점에 대한 개선 목표를 세우고 이를 충족하는 방법을 찾아 도입하였습니다.
+
+                    개선 목표
+
+                    - 코루틴을 사용할 수 있어야 한다.
+                    - call.enqueue를 통하여 오류 처리할 때만큼 촘촘한 오류처리
+                    - 보일러플레이트 코드의 제거
+
+                    이를 모두 만족하기 위하여 sealed class로 통신 결과를 가정하고 이를 분기 처리할 수 있도록 callAdpter를 커스텀 하였습니다.
+
+                    [callAdpater 관련 블로그 글](https://mccoy-devloper.tistory.com/58)
+
+                    <br>
+
+                - **각종 오류처리 핸들러에 대한 학습 및 장단점 비교**
+
+                    callAdapter를 도입하는 과정에서 비교해볼 수 있는 다양한 오류처리 방법 혹은 핸들러에 대해서 학습하였습니다.
+
+                    - 확장함수를 이용한 call.enqueue 코드의 간소화
+                    - try catch, runCatching의 극한 활용
+                    - sealed class를 이용한 Wrapper Class 사용
+                    - Coroutine Exception Handler
+
+                    <br>
+
+                ## 🖥 담당한 기능 (Android)
+                
+                - 각종 기초세팅 -> style guide, 패키징, text style 등등
+
+                - DI 기초세팅 모듈 관련 세팅학습
+
+                - 오류처리를 자세하게 작성하기 위해 retrofit의 callAdapter를 커스텀 오류처리의 다양화, 오류처리 관련 코드의 가독성을 좋게 만듬
+
+                    [사용 기술을 정리한 글](https://mccoy-devloper.tistory.com/58?category=494185).
+
+                - 소셜 로그인 네이버 카카오 및 로그인 관련 전반적인 토큰 관리 코드 작성 401 관련 에러 coroutine exception handler 를 통한 처리
+
+                    [코드를 정리한 글](https://mccoy-devloper.tistory.com/59?category=494185)
+
+                - 네이버 책 검색 api 연동
+
+                - 닉네임 설정 뷰 
+
+                - 네임 설정 뷰 작업 정규표현식을 통한 규칙 부여
+
+                - 책 검색 뷰  
+
+                - 네이버 책 검색 api 연동시 다양하게 들어오는 null 값 처리 및 오류 사항 대응
+
+                - 글쓰기 뷰
+
+                - 여러 화면을 거쳐서 통신을 한 번에 해야 하므로 ActivityViewModel 을 사용 처리
+                     
+                <br>
+
+                ## 🛠 사용 기술 및 라이브러리
+
+                - 아키텍쳐 패턴 : MVVM
+                - 디자인 패턴 : Multi Module
+                - AAC : Databinding, Livedata, ViewModel
+                - 통신 : OkHttp3, Retrofit2
+                - Async Task : Coroutine
+                - Third Party Library : coil, Timber
+                - 협업 : Git flow
+                - DI : Hilt
+            </md-block>
         </div>
         
     </body>
