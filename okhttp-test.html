@@ -1,0 +1,341 @@
+<html>
+    <head>
+        <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+        <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css"
+        integrity="sha512-bm684OXnsiNuQSyrxuuwo4PHqr3OzxPpXyhT66DA/fhl73e1JmBxRKGnO/nRwWvOZxJLRCmNH7FII+Yn1JNPmg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+    <body>
+        <div style="width: 70%;margin-left: auto;margin-right: auto; margin-top: 48px;margin-bottom: 60px;">
+            <md-block class="markdown-body">
+                ## 1차실험(maxRequest,maxRequestsPerHost default 사용)
+
+                Enqueue(okHttp) 1000 번 5회
+
+                1회차: enqueue with CountDownLatch : 13443
+
+                2회차: enqueue with CountDownLatch : 12335
+
+                3회차: enqueue with CountDownLatch : 14532
+
+                4회차: enqueue with CountDownLatch : 16644
+
+                5회차: enqueue with CountDownLatch : 14901
+
+
+
+                Future 1000 번 5회
+
+                1회차: execute with CountDownLatch : 10866
+
+                2회차: execute with CountDownLatch : 10794
+
+                3회차: execute with CountDownLatch : 10289
+
+                4회차: execute with CountDownLatch : 10735
+
+                5회차: execute with CountDownLatch : 9747
+
+
+
+                테스트 코드
+
+                ```kotlin
+                class FutureVsEnqueue {
+                    @Test
+                    fun okhttpEnqueueTest() {
+                        val enqueue = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val okHttpClient = OkHttpClient()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                                okHttpClient.newCall(request).enqueue(object : Callback {
+                                    override fun onFailure(call: Call, e: IOException) {
+                                    }
+
+                                    override fun onResponse(call: Call, response: Response) {
+                                        latch.countDown()
+                                        response.close()
+                                    }
+                                })
+                            }
+                            latch.await()
+                        }
+
+                        println("enqueue with CountDownLatch : $enqueue")
+                    }
+
+                    @Test
+                    fun futureTest() {
+                        val execute = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val okHttpClient = OkHttpClient()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                            CompletableFuture.supplyAsync {
+                                    val response = okHttpClient.newCall(request).execute()
+                                    response.close()
+                                }.thenAccept {
+                                latch.countDown()
+                                }
+                            }
+                        latch.await()
+                        }
+
+                        println("execute with CountDownLatch : $execute")
+                    }
+                }
+                ```
+
+
+
+                OkHttp의 maxRequest, maxRequestsPerHost 값을 조절하지 않고 기본값으로 놓고 테스트하였다.
+
+                많은 차이가 나지는 않지만 근소하게 CompletableFuture의 속도가 높은것을 볼수있다.
+
+                CompletableFuture의 경우 자바에서 가용할수있는 Thread수를 판단하여 Thread Pool의 크기를 결정하는것이기 때문에
+
+                현재 OKHttp가 Thread를 온전하게 사용하지 못한다고 판단 maxRequest, maxRequestsPerHost 를 늘려서 속도가 올라가는지 추가실험을 해보았다.
+
+
+
+                ## 2차실험(maxRequest = 100, maxRequestsPerHost default = 100)
+
+                Enqueue(okHttp) 1000 번 5회
+
+                1회차: enqueue with CountDownLatch : 10791
+
+                2회차: enqueue with CountDownLatch : 10112
+
+                3회차: enqueue with CountDownLatch : 10844
+
+                4회차: enqueue with CountDownLatch : 12104
+
+                5회차: enqueue with CountDownLatch : 11233
+
+
+
+                Future 1000 번 5회
+
+                1회차: enqueue with CountDownLatch : 11467
+
+                2회차: enqueue with CountDownLatch : 11514
+
+                3회차: enqueue with CountDownLatch : 11756
+
+                4회차: enqueue with CountDownLatch : 11341
+
+                5회차: enqueue with CountDownLatch : 11675
+
+
+
+                ```kotlin
+                class FutureVsEnqueue {
+                    @Test
+                    fun okhttpEnqueueTest() {
+                        val enqueue = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val dispatcher = Dispatcher().apply {
+                                maxRequests = 100
+                                maxRequestsPerHost = 100
+                            }
+                            val okHttpClient = OkHttpClient.Builder()
+                                .dispatcher(dispatcher)
+                                .build()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                                okHttpClient.newCall(request).enqueue(object : Callback {
+                                    override fun onFailure(call: Call, e: IOException) {
+                                    }
+
+                                    override fun onResponse(call: Call, response: Response) {
+                                        latch.countDown()
+                                        response.close()
+                                    }
+                                })
+                            }
+                            latch.await()
+                        }
+
+                        println("enqueue with CountDownLatch : $enqueue")
+                    }
+
+                    @Test
+                    fun futureTest() {
+                        val execute = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val dispatcher = Dispatcher().apply {
+                                maxRequests = 100
+                                maxRequestsPerHost = 100
+                            }
+                            val okHttpClient = OkHttpClient.Builder()
+                                .dispatcher(dispatcher)
+                                .build()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                                CompletableFuture.supplyAsync {
+                                    val response = okHttpClient.newCall(request).execute()
+                                    response.close()
+                                }.thenAccept {
+                                    latch.countDown()
+                                }
+                            }
+                            latch.await()
+                        }
+
+                        println("execute with CountDownLatch : $execute")
+                    }
+                }
+                ```
+
+                maxRequest, maxRequestsPerHost 값을 화끈하게 100으로 늘려버렸다.
+
+                확실히 OKHttp의 속도가 향상되었고 CompletableFuture 와 비슷한 성능을 내거나 좀 더 빨라졌다.
+
+                이런측면에서 maxRequest, maxRequestsPerHost을 늘리는 방향이 성능에 긍정적 영향을 끼친다고 생각되어 점진적으로 늘려 결과를 보는 실행을 진행하였다.
+
+
+
+                ## 3차실험(maxRequest = 120, maxRequestsPerHost default = 120)
+
+                Enqueue(okHttp) 1000 번 5회
+
+                1회차: enqueue with CountDownLatch : 9458
+
+                2회차: enqueue with CountDownLatch : 8801
+
+                3회차: enqueue with CountDownLatch : 7439
+
+                4회차: enqueue with CountDownLatch : 7978
+
+                5회차: enqueue with CountDownLatch : 7601
+
+
+
+                Future 1000 번 5회
+
+                1회차: execute with CountDownLatch : 13388
+
+                2회차: execute with CountDownLatch : 15932
+
+                3회차: execute with CountDownLatch : 15801
+
+                4회차: execute with CountDownLatch : 14476
+
+                5회차: execute with CountDownLatch : 13823
+
+
+
+                ``````
+                class FutureVsEnqueue {
+                    @Test
+                    fun okhttpEnqueueTest() {
+                        val enqueue = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val dispatcher = Dispatcher().apply {
+                                maxRequests = 120
+                                maxRequestsPerHost = 120
+                            }
+                            val okHttpClient = OkHttpClient.Builder()
+                                .dispatcher(dispatcher)
+                                .build()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                                okHttpClient.newCall(request).enqueue(object : Callback {
+                                    override fun onFailure(call: Call, e: IOException) {
+                                    }
+
+                                    override fun onResponse(call: Call, response: Response) {
+                                        latch.countDown()
+                                        response.close()
+                                    }
+                                })
+                            }
+                            latch.await()
+                        }
+
+                        println("enqueue with CountDownLatch : $enqueue")
+                    }
+
+                    @Test
+                    fun futureTest() {
+                        val execute = measureTimeMillis {
+                            val latch = CountDownLatch(1000)
+                            val url = "https://pbs.twimg.com/media/FpFzjV-aAAAIE-v?format=jpg&name=large"
+                            val dispatcher = Dispatcher().apply {
+                                maxRequests = 120
+                                maxRequestsPerHost = 120
+                            }
+                            val okHttpClient = OkHttpClient.Builder()
+                                .dispatcher(dispatcher)
+                                .build()
+                            val request = Request.Builder().url(url).build()
+
+                            repeat(1000) {
+                                CompletableFuture.supplyAsync {
+                                    val response = okHttpClient.newCall(request).execute()
+                                    response.close()
+                                }.thenAccept {
+                                    latch.countDown()
+                                }
+                            }
+                            latch.await()
+                        }
+
+                        println("execute with CountDownLatch : $execute")
+                    }
+                }
+                ``````
+
+                maxRequest, maxRequestsPerHost 을 120으로 잡자 확연히 enqueue의 속도가 빨라졌다.
+
+
+
+                ## 4차실험(maxRequest > 150, maxRequestsPerHost default > 150)
+
+                호출제한양을 150 이상 늘린결과 서버에서 거부하였다.(너무많은 요청이 동시에 들어와 튕겨버린것이라 예상) -> 애초에 너무 가혹한 환경이고 이 이상으로 호출제한을 늘리면 안될거라 예상된다. 서버, 인터넷, 현재 사용기기등 다양한 상황에 영향을 받으니 다양한 실험을해보고 maxRequests와 maxRequestsPerHost를 조절해야한다고 판단된다.
+
+
+
+                maxRequests와 maxRequestsPerHost를 150 이상으로 설정하였을시 나타난 Exception:
+
+                okhttp3.internal.http2.StreamResetException: stream was reset: REFUSED_STREAM
+
+
+
+                StreamResetException에 대한내용:
+
+                StreamResetException은 OkHttp 라이브러리의 내부 HTTP/2 모듈에 특정한 예외이다.
+
+                이 예외는 서버가 요청된 스트림을 처리하거나 처리하지 않기로 거부했음을 나타낸다.
+
+
+
+                서버가 요청을 받고 처리하지 않기로 결정한 경우, "REFUSED_STREAM" 오류 코드를 클라이언트에게 전송하여 해당 스트림이 재설정되었으며 요청이 수행되지 않을 것임을 알릴 수 있다. `StreamResetException`은 이러한 상황을 클라이언트 애플리케이션에게 알리기 위해 OkHttp에서 발생시키는 예외이다.
+
+                스트림이 거부되는 이유는 다음과 같을 수 있습니다:
+
+                1. 서버가 과부하 상태이거나 바쁘기 때문에 들어오는 요청을 처리할 수 없습니다.
+                2. 서버가 인증 또는 권한 문제로 인해 요청을 거부했습니다.
+                3. 서버가 요청한 기능이나 리소스를 지원하지 않습니다.
+                4. 서버가 요청을 처리하는 동안 내부 오류가 발생했습니다.
+
+
+
+                거부당한 예상시나리오: 한번에 너무많은 요청을 넣어버려서 그냥 거부당했다.
+            </md-block>
+        </div>
+        
+    </body>
+</html>
